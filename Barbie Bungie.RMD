@@ -1,0 +1,65 @@
+---
+title: "Barbie Bungie"
+Author: "Nathan Deinlein"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message= FALSE)
+#environment
+library(tidyverse)
+```
+
+## Barbie Bungie Competition 2021
+
+### Background
+During SMU M.S. of Data Science Immersion class, students are broken into groups for a competition. The goal of the competition is to get a Barbie or action figure as close to the ground without actually hitting it when dropped off a bridge and secured by a bungie cord of rubber bands. The team that gets the closest to the ground without hitting it wins. The competition sets students to a triathalon of tasks. They must first build a training data set, then build a linear regression model to predict the length of their rubber band chain, before, finally, testing their model by bungieing their Barbies head to head.
+
+### The Process
+The first action we took was to begin building our training data set. By slowly increasing the number of rubber bands in the bungie chain and recording the max distance traveled, we built up a set of 27 observations. This number was capped by use of a 60 inch measuring tape. This was documented and then graphed to check for correlation between the two.
+
+```{r Initial data, echo=FALSE}
+#read initial data
+data <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_Competition2021/main/Original%20Data.csv')
+data
+
+#scatterplot
+data %>% ggplot(aes(Bands, Length)) + geom_point()
+```
+ 
+As you can see from above there is a fairly strong and linear correlation between the number of rubber bands and the distance our Barbie fell. We were then told we would get one additional drop from a higher height with a longer tape measure, this one 100 inches. This would allow us to limit the amount of error in our model by limiting the amount of extrapolation needed. We wanted to come in under the 100 inch mark but wanted to at least get close. So we looked at our data. If 10 rubber bands got us to 60 inches, 20 rubber bands would probably be to many. So we decided to split the amount and go with 15 rubber bands. To give us a reference to how far it should fall with 15 rubber bands, we built a quick regression model on the base data.
+
+```{r First Regression, echo=FALSE}
+#linear regression
+lm <- lm(Length~Bands, data)
+lm
+
+#predict value at bands = 15
+test <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_Competition2021/main/Barbie%20Long%20Fall%20Test.csv')
+predict <- predict(lm, test)
+predict
+```
+ 
+With our initial model stating that we should have seen Barbie reach a distance of 85 inches, we were surprised when she only travelled 79 inches. This told us that the relationship was probably more parabolic than linear but not enough parabolic to require transformation. We then added this observation to the data and recreated the model. Our final task was to extrapolate from our model. It should be noted here, extrapolation is always fraught with issues. Models are designed only to predict accurately in the range in which they are built. But for the purposes of the competition, this normal rule was ignored so that we could complete the experiment. The bridge we would be dropping them from was 22 feet and 4 inches. This required us to convert all measurements to inches and then run our prediction.
+
+```{r Final Model, echo=FALSE}
+#add new observation
+result <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_Competition2021/main/Barbie%20Long%20Fall.csv')
+
+#bind observation to original data set
+barbie <- rbind(data,result)
+
+#linear regression with new value
+lm <- lm(Bands~Length, barbie)
+
+
+#add in final prediction value
+bridge <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_Competition2021/main/Final%20bridge%20fall.csv')
+final <- predict(lm, bridge)
+final
+```
+  
+To be on the safe side we decided that to round down our estimate rather than round up. Our final rubber band count then would be 51. This turned out to be the most accurate model of the competition with our group taking first place.
