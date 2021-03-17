@@ -37,6 +37,9 @@ As you can see from above there is a fairly strong and linear correlation betwee
 lm <- lm(Length~Bands, data)
 lm
 
+#linear regression plot
+data %>% ggplot(aes(Bands,Length)) + geom_smooth(method = "lm") + geom_point()
+
 #predict value at bands = 15
 test <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_Competition2021/main/Barbie%20Long%20Fall%20Test.csv')
 predict <- predict(lm, test)
@@ -52,9 +55,11 @@ result <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_C
 #bind observation to original data set
 barbie <- rbind(data,result)
 
+#final graph of linear regression
+barbie %>% ggplot(aes(Bands, Length)) + geom_smooth(method = "lm") + geom_point()
+
 #linear regression with new value
 lm <- lm(Bands~Length, barbie)
-
 
 #add in final prediction value
 bridge <- read.csv('https://raw.githubusercontent.com/nedeinlein/Barbie_Bungie_Competition2021/main/Final%20bridge%20fall.csv')
